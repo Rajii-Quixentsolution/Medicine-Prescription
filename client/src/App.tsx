@@ -1,0 +1,293 @@
+// client/src/App.tsx
+import React, { useState, useEffect } from 'react';
+import './App.css';
+import StoreComponent from './components/Store';
+import MedicineComponent from './components/Medicine';
+import PrescriptionBilling from './components/Billing';
+import { storeAPI, medicineAPI, billingAPI } from './services/api';
+import { IStore, IMedicine, IBilling } from './types'; // Import shared interfaces
+
+type ActiveTab = 'stores' | 'medicines' | 'prescriptions';
+
+function App() {
+  const [activeTab, setActiveTab] = useState<ActiveTab>('stores');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  
+  // Shared state for all components
+  const [stores, setStores] = useState<IStore[]>([]);
+  const [medicines, setMedicines] = useState<IMedicine[]>([]);
+  const [billings, setBillings] = useState<IBilling[]>([]);
+
+  // Load all data when component mounts
+  useEffect(() => {
+    loadAllData();
+  }, []);
+
+  const loadAllData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      // Load all data in parallel
+      const [storesData, medicinesData, billingsData] = await Promise.all([
+        storeAPI.getAll(),
+        medicineAPI.getAll(), 
+        billingAPI.getAll()
+      ]);
+      
+      setStores(storesData);
+      setMedicines(medicinesData);
+      setBillings(billingsData);
+    } catch (error) {
+      console.error('Error loading data:', error);
+      setError('Failed to load data. Please make sure the backend server is running on port 3001.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Store operations
+  const storeOperations = {
+    create: async (storeData: { name: string }) => {
+      try {
+        const newStore = await storeAPI.create(storeData);
+        setStores(prev => [...prev, newStore]);
+        return newStore;
+      } catch (error) {
+        console.error('Error creating store:', error);
+        throw error;
+      }
+    },
+    update: async (id: string, storeData: { name: string }) => {
+      try {
+        const updatedStore = await storeAPI.update(id, storeData);
+        setStores(prev => prev.map(store => 
+          store._id === id ? updatedStore : store
+        ));
+        return updatedStore;
+      } catch (error) {
+        console.error('Error updating store:', error);
+        throw error;
+      }
+    },
+    delete: async (id: string) => {
+      try {
+        await storeAPI.delete(id);
+        setStores(prev => prev.filter(store => store._id !== id));
+      } catch (error) {
+        console.error('Error deleting store:', error);
+        throw error;
+      }
+    }
+  };
+
+  // Medicine operations
+  const medicineOperations = {
+    create: async (medicineData: any) => {
+      try {
+        const newMedicine = await medicineAPI.create(medicineData);
+        setMedicines(prev => [...prev, newMedicine]);
+        return newMedicine;
+      } catch (error) {
+        console.error('Error creating medicine:', error);
+        throw error;
+      }
+    },
+    update: async (id: string, medicineData: any) => {
+      try {
+        const updatedMedicine = await medicineAPI.update(id, medicineData);
+        setMedicines(prev => prev.map(medicine => 
+          medicine._id === id ? updatedMedicine : medicine
+        ));
+        return updatedMedicine;
+      } catch (error) {
+        console.error('Error updating medicine:', error);
+        throw error;
+      }
+    },
+    delete: async (id: string) => {
+      try {
+        await medicineAPI.delete(id);
+        setMedicines(prev => prev.filter(medicine => medicine._id !== id));
+      } catch (error) {
+        console.error('Error deleting medicine:', error);
+        throw error;
+      }
+    }
+  };
+
+  // Billing operations
+  const billingOperations = {
+    create: async (billingData: any) => {
+      try {
+        const newBilling = await billingAPI.create(billingData);
+        setBillings(prev => [...prev, newBilling]);
+        return newBilling;
+      } catch (error) {
+        console.error('Error creating billing:', error);
+        throw error;
+      }
+    },
+    update: async (id: string, billingData: any) => {
+      try {
+        const updatedBilling = await billingAPI.update(id, billingData);
+        setBillings(prev => prev.map(billing => 
+          billing._id === id ? updatedBilling : billing
+        ));
+        return updatedBilling;
+      } catch (error) {
+        console.error('Error updating billing:', error);
+        throw error;
+      }
+    },
+    delete: async (id: string) => {
+      try {
+        await billingAPI.delete(id);
+        setBillings(prev => prev.filter(billing => billing._id !== id));
+      } catch (error) {
+        console.error('Error deleting billing:', error);
+        throw error;
+      }
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="App">
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'center', 
+          alignItems: 'center', 
+          height: '100vh' 
+        }}>
+          <div>Loading data from server...</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="App">
+        <div style={{ 
+          display: 'flex', 
+          flexDirection: 'column',
+          justifyContent: 'center', 
+          alignItems: 'center', 
+          height: '100vh',
+          textAlign: 'center'
+        }}>
+          <div style={{ color: 'red', marginBottom: '20px' }}>{error}</div>
+          <button 
+            onClick={loadAllData}
+            style={{
+              padding: '10px 20px',
+              backgroundColor: '#007bff',
+              color: 'white',
+              border: 'none',
+              borderRadius: '5px',
+              cursor: 'pointer'
+            }}
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const renderActiveComponent = () => {
+    switch (activeTab) {
+      case 'stores':
+        return <StoreComponent 
+          stores={stores} 
+          setStores={setStores}
+          storeOperations={storeOperations}
+        />;
+      case 'medicines':
+        return <MedicineComponent 
+          stores={stores} 
+          medicines={medicines} 
+          setMedicines={setMedicines}
+          medicineOperations={medicineOperations}
+        />;
+      case 'prescriptions':
+        return <PrescriptionBilling 
+          stores={stores}
+          medicines={medicines}
+          billings={billings}
+          setBillings={setBillings}
+          billingOperations={billingOperations}
+        />;
+      default:
+        return <StoreComponent 
+          stores={stores} 
+          setStores={setStores}
+          storeOperations={storeOperations}
+        />;
+    }
+  };
+
+  return (
+    <div className="App">
+      <header style={{ 
+        backgroundColor: '#343a40', 
+        color: 'white', 
+        padding: '1rem',
+        marginBottom: '2rem'
+      }}>
+        <h1>Doctor Prescription Website</h1>
+        <nav style={{ marginTop: '1rem' }}>
+          <button
+            onClick={() => setActiveTab('stores')}
+            style={{
+              padding: '10px 20px',
+              marginRight: '10px',
+              backgroundColor: activeTab === 'stores' ? '#007bff' : '#6c757d',
+              color: 'white',
+              border: 'none',
+              borderRadius: '5px',
+              cursor: 'pointer'
+            }}
+          >
+            Store Management
+          </button>
+          <button
+            onClick={() => setActiveTab('medicines')}
+            style={{
+              padding: '10px 20px',
+              marginRight: '10px',
+              backgroundColor: activeTab === 'medicines' ? '#007bff' : '#6c757d',
+              color: 'white',
+              border: 'none',
+              borderRadius: '5px',
+              cursor: 'pointer'
+            }}
+          >
+            Medicine Inventory
+          </button>
+          <button
+            onClick={() => setActiveTab('prescriptions')}
+            style={{
+              padding: '10px 20px',
+              backgroundColor: activeTab === 'prescriptions' ? '#007bff' : '#6c757d',
+              color: 'white',
+              border: 'none',
+              borderRadius: '5px',
+              cursor: 'pointer'
+            }}
+          >
+            Prescriptions & Billing
+          </button>
+        </nav>
+      </header>
+      
+      <main>
+        {renderActiveComponent()}
+      </main>
+    </div>
+  );
+}
+
+export default App;
