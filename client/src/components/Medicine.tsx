@@ -7,6 +7,7 @@ interface MedicineFormData {
   storeId: string;
   expirydate: string;
   stock: number;
+  batchNumber: string;
 }
 
 interface MedicineOperations {
@@ -36,7 +37,8 @@ const Medicine: React.FC<MedicineProps> = ({
     name: '',
     storeId: '',
     expirydate: '',
-    stock: 0
+    stock: 0,
+    batchNumber: ''
   });
 
   const getStoreName = (store: IStore) => {
@@ -59,12 +61,13 @@ const Medicine: React.FC<MedicineProps> = ({
 
   const filteredMedicines = medicines.filter(medicine =>
     medicine.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    getStoreName(medicine.storeId).toLowerCase().includes(searchTerm.toLowerCase())
+    getStoreName(medicine.storeId).toLowerCase().includes(searchTerm.toLowerCase()) ||
+    medicine.batchNumber.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.name.trim() || !formData.storeId || !formData.expirydate || formData.stock < 0) {
+    if (!formData.name.trim() || !formData.storeId || !formData.expirydate || formData.stock < 0 || !formData.batchNumber.trim()) {
       return;
     }
 
@@ -90,7 +93,8 @@ const Medicine: React.FC<MedicineProps> = ({
       name: medicine.name,
       storeId: medicine.storeId._id, // Access _id for form input
       expirydate: new Date(medicine.expirydate).toISOString().split('T')[0], // Format for date input
-      stock: medicine.stock
+      stock: medicine.stock,
+      batchNumber: medicine.batchNumber
     });
     setShowModal(true);
   };
@@ -110,13 +114,13 @@ const Medicine: React.FC<MedicineProps> = ({
   };
 
   const resetForm = () => {
-    setFormData({ name: '', storeId: '', expirydate: '', stock: 0 });
+    setFormData({ name: '', storeId: '', expirydate: '', stock: 0, batchNumber: '' });
     setEditingMedicine(null);
     setShowModal(false);
   };
 
   return (
-    <div className="p-6 max-w-6xl mx-auto">
+    <div className="p-6 max-w-full mx-auto">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">
           <Pill className="w-6 h-6 text-green-600" />
@@ -137,7 +141,7 @@ const Medicine: React.FC<MedicineProps> = ({
         <Search className="w-4 h-4 absolute left-3 top-3 text-gray-400" />
         <input
           type="text"
-          placeholder="Search medicines or stores..."
+          placeholder="Search medicines, stores, or batch numbers..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
@@ -153,101 +157,113 @@ const Medicine: React.FC<MedicineProps> = ({
 
       {/* Medicine Table */}
       <div className="bg-white rounded-lg shadow-md overflow-hidden">
-        <table className="w-full">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Medicine Name
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Store
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Expiry Date
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Stock
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Status
-              </th>
-              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Actions
-              </th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {filteredMedicines.length > 0 ? (
-              filteredMedicines.map((medicine) => (
-                <tr key={medicine._id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {medicine.name}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {getStoreName(medicine.storeId)}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {new Date(medicine.expirydate).toLocaleDateString()}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    <span className={`px-2 py-1 rounded-full text-xs ${
-                      medicine.stock <= 10 
-                        ? 'bg-red-100 text-red-800' 
-                        : medicine.stock <= 50 
-                        ? 'bg-yellow-100 text-yellow-800' 
-                        : 'bg-green-100 text-green-800'
-                    }`}>
-                      {medicine.stock}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">
-                    {isExpired(medicine.expirydate) ? (
-                      <span className="flex items-center gap-1 text-red-600">
-                        <AlertTriangle className="w-4 h-4" />
-                        Expired
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-max">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[120px]">
+                  Medicine Name
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[120px]">
+                  Store
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[120px]">
+                  Batch Number
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[100px]">
+                  Expiry Date
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[80px]">
+                  Stock
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[100px]">
+                  Status
+                </th>
+                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[100px] sticky right-0 bg-gray-50">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {filteredMedicines.length > 0 ? (
+                filteredMedicines.map((medicine) => (
+                  <tr key={medicine._id} className="hover:bg-gray-50">
+                    <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      {medicine.name}
+                    </td>
+                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {getStoreName(medicine.storeId)}
+                    </td>
+                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 font-mono">
+                      {medicine.batchNumber || 'N/A'}
+                    </td>
+                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {new Date(medicine.expirydate).toLocaleDateString()}
+                    </td>
+                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        medicine.stock <= 10 
+                          ? 'bg-red-100 text-red-800' 
+                          : medicine.stock <= 50 
+                          ? 'bg-yellow-100 text-yellow-800' 
+                          : 'bg-green-100 text-green-800'
+                      }`}>
+                        {medicine.stock}
                       </span>
-                    ) : isExpiringSoon(medicine.expirydate) ? (
-                      <span className="flex items-center gap-1 text-orange-600">
-                        <AlertTriangle className="w-4 h-4" />
-                        Expiring Soon
-                      </span>
-                    ) : (
-                      <span className="text-green-600">Good</span>
-                    )}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <button
-                      onClick={() => handleEdit(medicine)}
-                      className="text-green-600 hover:text-green-900 mr-3"
-                      disabled={loading}
-                    >
-                      <Edit2 className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(medicine._id)}
-                      className="text-red-600 hover:text-red-900"
-                      disabled={loading}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                    </td>
+                    <td className="px-4 py-4 whitespace-nowrap text-sm">
+                      {isExpired(medicine.expirydate) ? (
+                        <span className="flex items-center gap-1 text-red-600">
+                          <AlertTriangle className="w-4 h-4" />
+                          Expired
+                        </span>
+                      ) : isExpiringSoon(medicine.expirydate) ? (
+                        <span className="flex items-center gap-1 text-orange-600">
+                          <AlertTriangle className="w-4 h-4" />
+                          Expiring Soon
+                        </span>
+                      ) : (
+                        <span className="text-green-600">Good</span>
+                      )}
+                    </td>
+                    <td className="px-4 py-4 whitespace-nowrap text-sm font-medium sticky right-0 bg-white">
+                      <div className="flex items-center justify-center gap-2">
+                        <button
+                          onClick={() => handleEdit(medicine)}
+                          className="text-green-600 hover:text-green-900 p-1 rounded hover:bg-green-50 transition-colors"
+                          disabled={loading}
+                          title="Edit"
+                        >
+                          <Edit2 className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(medicine._id)}
+                          className="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50 transition-colors"
+                          disabled={loading}
+                          title="Delete"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={7} className="px-6 py-4 text-center text-gray-500">
+                    {searchTerm ? 'No medicines found matching your search' : 'No medicines found'}
                   </td>
                 </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan={6} className="px-6 py-4 text-center text-gray-500">
-                  {searchTerm ? 'No medicines found matching your search' : 'No medicines found'}
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {/* Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-96 max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
             <h2 className="text-xl font-bold mb-4">
               {editingMedicine ? 'Edit Medicine' : 'Add New Medicine'}
             </h2>
@@ -285,6 +301,21 @@ const Medicine: React.FC<MedicineProps> = ({
                     </option>
                   ))}
                 </select>
+              </div>
+
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Batch Number
+                </label>
+                <input
+                  type="text"
+                  value={formData.batchNumber}
+                  onChange={(e) => setFormData({ ...formData, batchNumber: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                  placeholder="Enter batch number"
+                  required
+                  disabled={loading}
+                />
               </div>
 
               <div className="mb-4">

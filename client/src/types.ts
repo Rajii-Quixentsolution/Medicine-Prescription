@@ -10,6 +10,7 @@ export interface IMedicine {
   storeId: IStore;
   expirydate: string;
   stock: number;
+  batchNumber: string;
 }
 
 export interface IBilling {
@@ -20,6 +21,5 @@ export interface IBilling {
   name: string;
   number: string;
   description?: string; // Added description field
-  problem?: string; // Field for patient's disease/problem
   createdAt?: string;
 }

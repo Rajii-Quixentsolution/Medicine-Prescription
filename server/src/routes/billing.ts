@@ -9,7 +9,7 @@ const router = express.Router();
 router.get('/', async (req: Request, res: Response) => {
   try {
     const prescriptions = await Billing.find()
-      .populate('medicineId', 'name expirydate stock')
+      .populate('medicineId', 'name expirydate stock batchNumber') // Added batchNumber
       .populate('storeId', 'name')
       .sort({ createdAt: -1 });
     res.json(prescriptions);
@@ -31,7 +31,7 @@ router.get('/store/:storeId', async (req: Request, res: Response) => {
     }
     
     const prescriptions = await Billing.find({ storeId })
-      .populate('medicineId', 'name expirydate stock')
+      .populate('medicineId', 'name expirydate stock batchNumber') // Added batchNumber
       .populate('storeId', 'name')
       .sort({ createdAt: -1 });
       
@@ -54,7 +54,7 @@ router.get('/medicine/:medicineId', async (req: Request, res: Response) => {
     }
     
     const prescriptions = await Billing.find({ medicineId })
-      .populate('medicineId', 'name expirydate stock')
+      .populate('medicineId', 'name expirydate stock batchNumber') // Added batchNumber
       .populate('storeId', 'name')
       .sort({ createdAt: -1 });
       
@@ -73,7 +73,7 @@ router.get('/patient/:name', async (req: Request, res: Response) => {
     const prescriptions = await Billing.find({ 
       name: { $regex: name, $options: 'i' } // Case-insensitive search
     })
-      .populate('medicineId', 'name expirydate stock')
+      .populate('medicineId', 'name expirydate stock batchNumber') // Added batchNumber
       .populate('storeId', 'name')
       .sort({ createdAt: -1 });
       
@@ -89,7 +89,7 @@ router.get('/:id', async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const prescription = await Billing.findById(id)
-      .populate('medicineId', 'name expirydate stock')
+      .populate('medicineId', 'name expirydate stock batchNumber') // Added batchNumber
       .populate('storeId', 'name');
     
     if (!prescription) {
@@ -160,7 +160,7 @@ router.post('/', async (req: Request, res: Response) => {
     await medicine.save();
 
     const populatedPrescription = await Billing.findById(prescription._id)
-      .populate('medicineId', 'name expirydate stock')
+      .populate('medicineId', 'name expirydate stock batchNumber') // Added batchNumber
       .populate('storeId', 'name');
 
     res.status(201).json(populatedPrescription);
@@ -222,7 +222,7 @@ router.put('/:id', async (req: Request, res: Response) => {
       updateData,
       { new: true }
     )
-      .populate('medicineId', 'name expirydate stock')
+      .populate('medicineId', 'name expirydate stock batchNumber') // Added batchNumber
       .populate('storeId', 'name');
 
     if (!prescription) {

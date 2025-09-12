@@ -163,9 +163,10 @@ const Billing: React.FC<BillingProps> = ({
     
     doc.setFontSize(12);
     doc.text(`Medicine: ${getMedicineName(billing.medicineId)}`, 20, 125);
-    doc.text(`Store: ${getStoreName(billing.storeId)}`, 20, 135);
-    doc.text(`Frequency: ${billing.frequency}`, 20, 145);
-    doc.text(`Date: ${billing.createdAt ? new Date(billing.createdAt).toLocaleDateString() : 'N/A'}`, 20, 155);
+    doc.text(`Batch Number: ${billing.medicineId.batchNumber}`, 20, 135);
+    doc.text(`Store: ${getStoreName(billing.storeId)}`, 20, 145);
+    doc.text(`Frequency: ${billing.frequency}`, 20, 155);
+    doc.text(`Date: ${billing.createdAt ? new Date(billing.createdAt).toLocaleDateString() : 'N/A'}`, 20, 165);
     
     // Create a simple table manually for prescription
     doc.setFontSize(14);
@@ -200,7 +201,7 @@ const Billing: React.FC<BillingProps> = ({
   };
 
   return (
-    <div className="p-6 max-w-6xl mx-auto">
+    <div className="p-6 max-w-full mx-auto">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">
           <FileText className="w-6 h-6 text-purple-600" />
@@ -235,109 +236,124 @@ const Billing: React.FC<BillingProps> = ({
         </div>
       )}
 
-      {/* Billing Table */}
+      {/* Billing Table - Added horizontal scroll for better responsiveness */}
       <div className="bg-white rounded-lg shadow-md overflow-hidden">
-        <table className="w-full">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Patient Name
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Contact/Prescription
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Description
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Medicine
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Store
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Frequency
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Date
-              </th>
-              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Actions
-              </th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {filteredBillings.length > 0 ? (
-              filteredBillings.map((billing) => (
-                <tr key={billing._id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {billing.name}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {billing.number}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {billing.description || 'N/A'}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {getMedicineName(billing.medicineId)}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {getStoreName(billing.storeId)}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">
-                    <span className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs ${
-                      billing.frequency === 'morning' 
-                        ? 'bg-orange-100 text-orange-800' 
-                        : 'bg-blue-100 text-blue-800'
-                    }`}>
-                      <Clock className="w-3 h-3" />
-                      {billing.frequency}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {billing.createdAt ? new Date(billing.createdAt).toLocaleDateString() : 'N/A'}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <button
-                      onClick={() => handlePrint(billing)}
-                      className="text-blue-600 hover:text-blue-900 mr-3"
-                      disabled={loading}
-                    >
-                      <Printer className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => handleEdit(billing)}
-                      className="text-purple-600 hover:text-purple-900 mr-3"
-                      disabled={loading}
-                    >
-                      <Edit2 className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(billing._id)}
-                      className="text-red-600 hover:text-red-900"
-                      disabled={loading}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-max">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[120px]">
+                  Patient Name
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[140px]">
+                  Contact/Prescription
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[120px]">
+                  Description
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[120px]">
+                  Medicine
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[120px]">
+                  Batch Number
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[120px]">
+                  Store
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[100px]">
+                  Frequency
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[100px]">
+                  Date
+                </th>
+                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[120px] sticky right-0 bg-gray-50">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {filteredBillings.length > 0 ? (
+                filteredBillings.map((billing) => (
+                  <tr key={billing._id} className="hover:bg-gray-50">
+                    <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      {billing.name}
+                    </td>
+                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {billing.number}
+                    </td>
+                    <td className="px-4 py-4 text-sm text-gray-500 max-w-[150px]">
+                      <div className="truncate" title={billing.description || 'N/A'}>
+                        {billing.description || 'N/A'}
+                      </div>
+                    </td>
+                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {getMedicineName(billing.medicineId)}
+                    </td>
+                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {billing.medicineId.batchNumber}
+                    </td>
+                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {getStoreName(billing.storeId)}
+                    </td>
+                    <td className="px-4 py-4 whitespace-nowrap text-sm">
+                      <span className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs ${
+                        billing.frequency === 'morning' 
+                          ? 'bg-orange-100 text-orange-800' 
+                          : 'bg-blue-100 text-blue-800'
+                      }`}>
+                        <Clock className="w-3 h-3" />
+                        {billing.frequency}
+                      </span>
+                    </td>
+                    <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {billing.createdAt ? new Date(billing.createdAt).toLocaleDateString() : 'N/A'}
+                    </td>
+                    <td className="px-4 py-4 whitespace-nowrap text-sm font-medium sticky right-0 bg-white">
+                      <div className="flex items-center justify-center gap-2">
+                        <button
+                          onClick={() => handlePrint(billing)}
+                          className="text-blue-600 hover:text-blue-900 p-1 rounded hover:bg-blue-50 transition-colors"
+                          disabled={loading}
+                          title="Print Receipt"
+                        >
+                          <Printer className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => handleEdit(billing)}
+                          className="text-purple-600 hover:text-purple-900 p-1 rounded hover:bg-purple-50 transition-colors"
+                          disabled={loading}
+                          title="Edit"
+                        >
+                          <Edit2 className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(billing._id)}
+                          className="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50 transition-colors"
+                          disabled={loading}
+                          title="Delete"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={9} className="px-6 py-4 text-center text-gray-500">
+                    {searchTerm ? 'No billing records found matching your search' : 'No billing records found'}
                   </td>
                 </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan={8} className="px-6 py-4 text-center text-gray-500">
-                  {searchTerm ? 'No billing records found matching your search' : 'No billing records found'}
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {/* Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-96 max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
             <h2 className="text-xl font-bold mb-4">
               {editingBilling ? 'Edit Billing Record' : 'Add New Billing Record'}
             </h2>
@@ -366,7 +382,7 @@ const Billing: React.FC<BillingProps> = ({
                   value={formData.number}
                   onChange={(e) => setFormData({ ...formData, number: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
-                  placeholder="Enter contact "
+                  placeholder="Enter contact number"
                   required
                   disabled={loading}
                 />
@@ -470,4 +486,4 @@ const Billing: React.FC<BillingProps> = ({
   );
 };
 
-export default Billing; 
+export default Billing;

@@ -55,12 +55,12 @@ router.get('/:id', async (req: Request, res: Response) => {
 // Create a new medicine
 router.post('/', async (req: Request, res: Response) => {
   try {
-    const { name, storeId, expirydate, stock } = req.body;
-    
+    const { name, storeId, expirydate, stock, batchNumber } = req.body;
+
     // Validate required fields
-    if (!name || !storeId || !expirydate || stock === undefined) {
-      return res.status(400).json({ 
-        error: 'All fields (name, storeId, expirydate, stock) are required' 
+    if (!name || !storeId || !expirydate || stock === undefined || !batchNumber) {
+      return res.status(400).json({
+        error: 'All fields (name, storeId, expirydate, stock, batchNumber) are required'
       });
     }
     
@@ -91,6 +91,7 @@ router.post('/', async (req: Request, res: Response) => {
       storeId,
       expirydate: expiry,
       stock,
+      batchNumber: batchNumber.trim(),
     });
     
     const populatedMedicine = await Medicine.findById(medicine._id).populate('storeId', 'name');
@@ -106,7 +107,7 @@ router.post('/', async (req: Request, res: Response) => {
 router.put('/:id', async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { name, storeId, expirydate, stock } = req.body;
+    const { name, storeId, expirydate, stock, batchNumber } = req.body;
     
     // Validate stock is non-negative if provided
     if (stock !== undefined && stock < 0) {
@@ -139,6 +140,7 @@ router.put('/:id', async (req: Request, res: Response) => {
     if (storeId !== undefined) updateData.storeId = storeId;
     if (expirydate !== undefined) updateData.expirydate = expiry;
     if (stock !== undefined) updateData.stock = stock;
+    if (batchNumber !== undefined) updateData.batchNumber = batchNumber.trim();
     
     const medicine = await Medicine.findByIdAndUpdate(
       id,
