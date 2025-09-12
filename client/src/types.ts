@@ -20,5 +20,6 @@ export interface IBilling {
   name: string;
   number: string;
   description?: string; // Added description field
+  problem?: string; // Field for patient's disease/problem
   createdAt?: string;
 }

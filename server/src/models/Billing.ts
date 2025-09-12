@@ -7,6 +7,7 @@ export interface IBilling extends Document {
   name: string;  // Patient/customer name
   number: string; // Contact number or prescription number
   description?: string; // Added description field for prescription
+  problem?: string; // Field for patient's disease/problem
 }
 
 const BillingSchema: Schema = new Schema({
@@ -37,6 +38,11 @@ const BillingSchema: Schema = new Schema({
   },
   description: { 
     type: String, 
+    required: false,
+    trim: true
+  },
+  problem: {
+    type: String,
     required: false,
     trim: true
   }

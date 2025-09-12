@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
-import { Plus, Edit2, Trash2, Search, FileText, Clock } from 'lucide-react';
+import { Plus, Edit2, Trash2, Search, FileText, Clock, Printer } from 'lucide-react';
 import { IStore, IMedicine, IBilling } from '../types'; // Import shared interfaces
+import jsPDF from 'jspdf';
+import 'jspdf-autotable'; // Import the plugin
 
 interface BillingFormData {
   medicineId: string;
@@ -128,6 +130,70 @@ const Billing: React.FC<BillingProps> = ({
     setShowModal(false);
   };
 
+  const handlePrint = (billing: IBilling) => {
+    const doc = new jsPDF();
+    
+    // Add title
+    doc.setFontSize(20);
+    doc.text('Prescription/Billing Receipt', 14, 25);
+    
+    // Add a line
+    doc.line(14, 30, 196, 30);
+    
+    // Patient details
+    doc.setFontSize(14);
+    doc.text('Patient Information:', 14, 45);
+    
+    doc.setFontSize(12);
+    doc.text(`Patient Name: ${billing.name}`, 20, 55);
+    doc.text(`Contact/Prescription No: ${billing.number}`, 20, 65);
+    
+    // Handle long descriptions with text wrapping
+    if (billing.description) {
+      doc.text('Description/Problem:', 20, 75);
+      const splitDescription = doc.splitTextToSize(billing.description, 160);
+      doc.text(splitDescription, 20, 85);
+    } else {
+      doc.text('Description/Problem: N/A', 20, 75);
+    }
+    
+    // Prescription details
+    doc.setFontSize(14);
+    doc.text('Prescription Details:', 14, 115);
+    
+    doc.setFontSize(12);
+    doc.text(`Medicine: ${getMedicineName(billing.medicineId)}`, 20, 125);
+    doc.text(`Store: ${getStoreName(billing.storeId)}`, 20, 135);
+    doc.text(`Frequency: ${billing.frequency}`, 20, 145);
+    doc.text(`Date: ${billing.createdAt ? new Date(billing.createdAt).toLocaleDateString() : 'N/A'}`, 20, 155);
+    
+    // Create a simple table manually for prescription
+    doc.setFontSize(14);
+    doc.text('Prescription Summary:', 14, 175);
+    
+    // Table headers
+    doc.setFontSize(10);
+    doc.rect(14, 185, 90, 10); // Medicine column
+    doc.rect(104, 185, 50, 10); // Frequency column
+    
+    doc.text('Medicine', 16, 192);
+    doc.text('Frequency', 106, 192);
+    
+    // Table data
+    doc.rect(14, 195, 90, 10);
+    doc.rect(104, 195, 50, 10);
+    
+    const medicineName = getMedicineName(billing.medicineId);
+    doc.text(medicineName.length > 35 ? medicineName.substring(0, 35) + '...' : medicineName, 16, 202);
+    doc.text(billing.frequency.charAt(0).toUpperCase() + billing.frequency.slice(1), 106, 202);
+    
+    // Add footer
+    doc.setFontSize(10);
+    doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 14, 280);
+    
+    doc.save(`receipt-${billing.name}-${billing.number}.pdf`);
+  };
+
   // Handle store change and reset medicine selection
   const handleStoreChange = (storeId: string) => {
     setFormData({ ...formData, storeId, medicineId: '' });
@@ -234,6 +300,13 @@ const Billing: React.FC<BillingProps> = ({
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <button
+                      onClick={() => handlePrint(billing)}
+                      className="text-blue-600 hover:text-blue-900 mr-3"
+                      disabled={loading}
+                    >
+                      <Printer className="w-4 h-4" />
+                    </button>
+                    <button
                       onClick={() => handleEdit(billing)}
                       className="text-purple-600 hover:text-purple-900 mr-3"
                       disabled={loading}
@@ -286,14 +359,14 @@ const Billing: React.FC<BillingProps> = ({
 
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Contact Number / Prescription Number
+                  Contact Number 
                 </label>
                 <input
                   type="text"
                   value={formData.number}
                   onChange={(e) => setFormData({ ...formData, number: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
-                  placeholder="Enter contact or prescription number"
+                  placeholder="Enter contact "
                   required
                   disabled={loading}
                 />
@@ -397,4 +470,4 @@ const Billing: React.FC<BillingProps> = ({
   );
 };
 
-export default Billing;
+export default Billing; 
