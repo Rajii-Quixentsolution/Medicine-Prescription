@@ -1,176 +1,134 @@
-# Medicine Management System
+# Medicine Prescription Management System
 
-This is a backend API for a Medicine Management System that allows you to manage medical stores, medicines, and prescriptions.
-
-## Tech Stack
-
--   **Backend:** Node.js, Express.js, TypeScript
--   **Database:** PostgreSQL
--   **ORM:** Prisma
--   **Database Hosting:** Supabase
-
-## Prerequisites
-
-Before you begin, ensure you have the following installed:
-
--   [Node.js](https://nodejs.org/) (v14 or higher)
--   [npm](https://www.npmjs.com/) (v6 or higher)
--   [PostgreSQL](https://www.postgresql.org/)
-
-## Getting Started
-
-1.  **Clone the repository:**
-
-    ```bash
-    git clone https://github.com/your-username/medicine-management-system.git
-    cd medicine-management-system
-    ```
-
-2.  **Install dependencies:**
-
-    ```bash
-    npm install
-    ```
-
-3.  **Set up the environment variables:**
-
-    Create a `.env` file in the `server` directory and add your PostgreSQL database URL:
-
-    ```env
-    DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DATABASE"
-    ```
-
-4.  **Set up the database:**
-
-    Run the following commands to generate the Prisma client and push the database schema:
-
-    ```bash
-    npx prisma generate
-    npx prisma db push
-    ```
-
-5.  **Run the application:**
-
-    -   To start the server:
-        ```bash
-        npm run dev
-        ```
-    -   To start the client:
-        ```bash
-        npm start
-        ```
-    -   To view the database with Prisma Studio:
-        ```bash
-        npx prisma studio
-        ```
-
-## Data Models
-
-### Store
-
-Represents a medical store.
-
-| Field     | Type      | Description               |
-| :-------- | :-------- | :------------------------ |
-| `id`      | `Int`     | Unique identifier         |
-| `name`    | `String`  | Name of the store         |
-| `medicines`| `Medicine[]`| List of medicines in the store |
-| `billings`| `Billing[]` | List of billings from the store |
-
-### Medicine
-
-Represents a medicine in a store.
-
-| Field        | Type      | Description                  |
-| :----------- | :-------- | :--------------------------- |
-| `id`         | `Int`     | Unique identifier            |
-| `name`       | `String`  | Name of the medicine         |
-| `storeId`    | `Int`     | ID of the store it belongs to|
-| `expirydate` | `DateTime`| Expiry date of the medicine  |
-| `stock`      | `Int`     | Available stock              |
-| `billings`   | `Billing[]`| List of billings for the medicine |
-
-### Billing
-
-Represents a billing record for a medicine.
-
-| Field        | Type     | Description                  |
-| :----------- | :------- | :--------------------------- |
-| `id`         | `Int`    | Unique identifier            |
-| `medicineId` | `Int`    | ID of the medicine being billed |
-| `storeId`    | `Int`    | ID of the store              |
-| `frequency`  | `String` | Dosage frequency (e.g., "1-0-1") |
-| `name`       | `String` | Name of the patient          |
-| `number`     | `String` | Contact number of the patient|
-
-## API Endpoints
-
-### Stores
-
--   `GET /api/stores`: Get all stores
--   `POST /api/stores`: Create a new store
--   `PUT /api/stores/:id`: Update a store
--   `DELETE /api/stores/:id`: Delete a store
-
-### Medicines
-
--   `GET /api/medicines`: Get all medicines
--   `POST /api/medicines`: Create a new medicine
--   `PUT /api/medicines/:id`: Update a medicine
--   `DELETE /api/medicines/:id`: Delete a medicine
-
-### Billings
-
--   `GET /api/billings`: Get all billings
--   `POST /api/billings`: Create a new billing
--   `PUT /api/billings/:id`: Update a billing
--   `DELETE /api/billings/:id`: Delete a billing
-
-## Usage Examples
-
-### Create a Store
-
-```http
-POST /api/stores
-Content-Type: application/json
-
-{
-  "name": "My Medical Store"
-}
-```
-
-### Add a Medicine
-
-```http
-POST /api/medicines
-Content-Type: application/json
-
-{
-  "name": "Aspirin",
-  "storeId": 1,
-  "expirydate": "2026-01-01T00:00:00.000Z",
-  "stock": 200
-}
-```
-
-### Create a Billing
-
-```http
-POST /api/billings
-Content-Type: application/json
-
-{
-  "medicineId": 1,
-  "storeId": 1,
-  "frequency": "1-1-1",
-  "name": "Jane Doe",
-  "number": "0987654321"
-}
-```
+A full-stack application for managing medicine prescriptions, built with React, TypeScript, Node.js, Express, and MongoDB.
 
 ## Features
 
--   **Automatic Stock Management:** Automatically updates medicine stock levels when a new billing is created.
--   **Data Validation:** Ensures that the data sent to the API is valid.
--   **CORS Enabled:** Allows cross-origin requests from any domain.
--   **Transactional Safety:** Ensures that database operations are performed safely and consistently.
+- **Prescription Management**: Create, view, and manage prescriptions
+- **Medicine Inventory**: Track medicine stock and details
+- **Responsive Design**: Works on desktop and mobile devices
+- **PDF Generation**: Export prescriptions as PDF documents
+
+## Tech Stack
+
+### Frontend (Client)
+- React 19 with TypeScript
+- Tailwind CSS for styling
+- React Testing Library for testing
+- jsPDF for PDF generation
+- Lucide React for icons
+
+### Backend (Server)
+- Node.js with Express 5
+- TypeScript
+- MongoDB with Mongoose ODM
+- JWT for authentication (if implemented)
+- CORS enabled for cross-origin requests
+
+## Project Structure
+
+```
+medicine-prescription/
+├── client/                 # Frontend React application
+│   ├── public/             # Static files
+│   └── src/                # Source files
+│       ├── components/     # Reusable UI components
+│       ├── services/       # API services
+│       └── ...
+├── server/                 # Backend server
+│   ├── src/
+│   │   ├── middleware/    # Express middleware
+│   │   ├── models/        # Database models (Mongoose)
+│   │   └── routes/        # API routes
+│   └── ...
+├── .gitignore
+└── README.md
+```
+
+## Prerequisites
+
+- Node.js (v18 or higher)
+- npm (v9 or higher) or yarn
+- MongoDB (local or cloud instance)
+
+## Getting Started
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/Rajii-Quixentsolution/Medicine-Prescription.git
+cd medicine-prescription
+```
+
+### 2. Set up the Backend
+
+1. Navigate to the server directory:
+   ```bash
+   cd server
+   ```
+
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+3. Create a `.env` file in the server directory and add your environment variables:
+   ```env
+   MONGODB_URI=mongodb://localhost:27017/medicine_prescription
+   JWT_SECRET=your_jwt_secret
+   PORT=3001
+   ```
+
+4. Start the development server:
+   ```bash
+   npm run dev
+   ```
+
+### 3. Set up the Frontend
+
+1. Open a new terminal and navigate to the client directory:
+   ```bash
+   cd ../client
+   ```
+
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+3. Start the development server:
+   ```bash
+   npm start
+   ```
+
+4. The application should automatically open in your default browser at [http://localhost:3000](http://localhost:3000)
+
+## Available Scripts
+
+### Client
+- `npm start`: Start the development server
+- `npm test`: Run tests
+- `npm run build`: Create a production build
+- `npm run eject`: Eject from Create React App
+
+### Server
+- `npm run dev`: Start the development server with hot-reload using nodemon
+- `postinstall`: Automatically runs Prisma generate after installation
+
+## Development
+
+- The frontend runs on port 3000
+- The backend API runs on port 3001
+- The frontend is configured to proxy API requests to the backend
+
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
