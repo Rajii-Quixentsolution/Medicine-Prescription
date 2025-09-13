@@ -4,6 +4,8 @@ import dotenv from 'dotenv';
 import storeRoutes from './routes/store';
 import medicineRoutes from './routes/medicine';
 import billingRoutes from './routes/billing';
+import authRoutes from './routes/auth';
+import userRoutes from "./routes/user"
 
 dotenv.config();
 
@@ -26,6 +28,8 @@ app.use(express.json());
 app.use('/api/stores', storeRoutes);
 app.use('/api/medicines', medicineRoutes);
 app.use('/api/billings', billingRoutes);
+app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes);
 
 app.get('/', (req: Request, res: Response) => {
   res.send('Doctor Prescription Website API is running!');

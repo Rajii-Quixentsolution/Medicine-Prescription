@@ -2,15 +2,24 @@ import express, { Request, Response } from 'express';
 import Store from '../models/Store';
 import Medicine from '../models/Medicine';
 import Billing from '../models/Billing';
+import { AuthRequest, auth, isAdmin } from '../middleware/auth';
 
 const router = express.Router();
 
 // Get all stores
-router.get('/', async (req: Request, res: Response) => {
+router.get('/', auth, async (req: AuthRequest, res: Response) => {
   try {
-    const stores = await Store.find();
+    const user = req.user;
+    let stores;
+    if (user.type === 'admin') {
+      stores = await Store.find();
+    }
+    else {
+      stores = await Store.find({ _id: user.storeId });
+    }
     res.json(stores);
-  } catch (error) {
+  }
+  catch (error) {
     console.error('Error fetching stores:', error);
     res.status(500).json({ error: 'Failed to fetch stores' });
   }
@@ -53,7 +62,7 @@ router.get('/:id/medicines', async (req: Request, res: Response) => {
 });
 
 // Create a new store
-router.post('/', async (req: Request, res: Response) => {
+router.post('/', auth, isAdmin, async (req: Request, res: Response) => {
   try {
     const { name } = req.body;
     
@@ -78,7 +87,7 @@ router.post('/', async (req: Request, res: Response) => {
 });
 
 // Update a store
-router.put('/:id', async (req: Request, res: Response) => {
+router.put('/:id', auth, isAdmin, async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const { name } = req.body;
@@ -115,7 +124,7 @@ router.put('/:id', async (req: Request, res: Response) => {
 });
 
 // Delete a store
-router.delete('/:id', async (req: Request, res: Response) => {
+router.delete('/:id', auth, isAdmin, async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     

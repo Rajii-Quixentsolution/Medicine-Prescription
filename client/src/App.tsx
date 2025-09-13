@@ -4,12 +4,15 @@ import './App.css';
 import StoreComponent from './components/Store';
 import MedicineComponent from './components/Medicine';
 import PrescriptionBilling from './components/Billing';
-import { storeAPI, medicineAPI, billingAPI } from './services/api';
-import { IStore, IMedicine, IBilling } from './types'; // Import shared interfaces
+import { storeAPI, medicineAPI, billingAPI, userAPI } from './services/api';
+import { IStore, IMedicine, IBilling, IUser } from './types'; // Import shared interfaces
+import Login from './components/Login';
+import UserComponent from './components/User';
 
-type ActiveTab = 'stores' | 'medicines' | 'prescriptions';
+type ActiveTab = 'stores' | 'medicines' | 'prescriptions' | 'users';
 
 function App() {
+  const [token, setToken] = useState<string | null>(localStorage.getItem('token'));
   const [activeTab, setActiveTab] = useState<ActiveTab>('stores');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -18,11 +21,30 @@ function App() {
   const [stores, setStores] = useState<IStore[]>([]);
   const [medicines, setMedicines] = useState<IMedicine[]>([]);
   const [billings, setBillings] = useState<IBilling[]>([]);
+  const [currentUser, setCurrentUser] = useState<IUser | null>(null);
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    setToken(null);
+  };
 
   // Load all data when component mounts
   useEffect(() => {
-    loadAllData();
-  }, []);
+    if (token) {
+      const fetchUser = async () => {
+        try {
+          const user = await userAPI.me();
+          setCurrentUser(user);
+        } catch (error) {
+          console.error('Error fetching user:', error);
+        }
+      };
+      fetchUser();
+      loadAllData();
+    } else {
+      setLoading(false);
+    }
+  }, [token]);
 
   const loadAllData = async () => {
     try {
@@ -152,6 +174,10 @@ function App() {
     }
   };
 
+  if (!token) {
+    return <Login />;
+  }
+
   if (loading) {
     return (
       <div className="App">
@@ -220,6 +246,8 @@ function App() {
           setBillings={setBillings}
           billingOperations={billingOperations}
         />;
+      case 'users':
+        return <UserComponent stores={stores} />;
       default:
         return <StoreComponent 
           stores={stores} 
@@ -279,6 +307,35 @@ function App() {
             }}
           >
             Prescriptions & Billing
+          </button>
+          {currentUser?.type === 'admin' && (
+            <button
+              onClick={() => setActiveTab('users')}
+              style={{
+                padding: '10px 20px',
+                marginRight: '10px',
+                backgroundColor: activeTab === 'users' ? '#007bff' : '#6c757d',
+                color: 'white',
+                border: 'none',
+                borderRadius: '5px',
+                cursor: 'pointer'
+              }}
+            >
+              User Management
+            </button>
+          )}
+          <button
+            onClick={handleLogout}
+            style={{
+              padding: '10px 20px',
+              backgroundColor: '#dc3545',
+              color: 'white',
+              border: 'none',
+              borderRadius: '5px',
+              cursor: 'pointer'
+            }}
+          >
+            Logout
           </button>
         </nav>
       </header>

@@ -2,16 +2,25 @@ import express, { Request, Response } from 'express';
 import Billing from '../models/Billing';
 import Medicine from '../models/Medicine';
 import Store from '../models/Store';
-
+import { AuthRequest, auth } from '../middleware/auth';
 const router = express.Router();
 
 // Get all prescriptions with medicine and store information
-router.get('/', async (req: Request, res: Response) => {
+router.get('/', auth, async (req: AuthRequest, res: Response) => {
   try {
-    const prescriptions = await Billing.find()
-      .populate('medicineId', 'name expirydate stock batchNumber') // Added batchNumber
-      .populate('storeId', 'name')
-      .sort({ createdAt: -1 });
+    const user = req.user;
+    let prescriptions;
+    if (user.type === 'admin') {
+      prescriptions = await Billing.find()
+        .populate('medicineId', 'name expirydate stock batchNumber') // Added batchNumber
+        .populate('storeId', 'name')
+        .sort({ createdAt: -1 });
+    } else {
+      prescriptions = await Billing.find({ storeId: user.storeId })
+        .populate('medicineId', 'name expirydate stock batchNumber') // Added batchNumber
+        .populate('storeId', 'name')
+        .sort({ createdAt: -1 });
+    }
     res.json(prescriptions);
   } catch (error) {
     console.error('Error fetching prescriptions:', error);
@@ -104,7 +113,7 @@ router.get('/:id', async (req: Request, res: Response) => {
 });
 
 // Create new prescription
-router.post('/', async (req: Request, res: Response) => {
+router.post('/', auth, async (req: Request, res: Response) => {
   try {
     const { medicineId, storeId, frequency, name, number, description } = req.body;
 
@@ -171,7 +180,7 @@ router.post('/', async (req: Request, res: Response) => {
 });
 
 // Update a prescription
-router.put('/:id', async (req: Request, res: Response) => {
+router.put('/:id', auth, async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const { medicineId, storeId, frequency, name, number, description } = req.body;
@@ -237,7 +246,7 @@ router.put('/:id', async (req: Request, res: Response) => {
 });
 
 // Delete a prescription
-router.delete('/:id', async (req: Request, res: Response) => {
+router.delete('/:id', auth, async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
 

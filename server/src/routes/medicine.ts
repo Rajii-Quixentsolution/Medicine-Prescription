@@ -2,13 +2,20 @@ import express, { Request, Response } from 'express';
 import Medicine from '../models/Medicine';
 import Store from '../models/Store';
 import Billing from '../models/Billing';
-
+import { AuthRequest, auth, isAdmin } from '../middleware/auth';
 const router = express.Router();
 
 // Get all medicines with store information
-router.get('/', async (req: Request, res: Response) => {
+router.get('/', auth, async (req: AuthRequest, res: Response) => {
   try {
-    const medicines = await Medicine.find().populate('storeId', 'name');
+    const user = req.user;
+    let medicines;
+    if (user.type === 'admin') {
+      medicines = await Medicine.find().populate('storeId', 'name');
+    }
+    else {
+      medicines = await Medicine.find({ storeId: user.storeId }).populate('storeId', 'name');
+    }
     res.json(medicines);
   } catch (error) {
     console.error('Error fetching medicines:', error);
@@ -53,14 +60,14 @@ router.get('/:id', async (req: Request, res: Response) => {
 });
 
 // Create a new medicine
-router.post('/', async (req: Request, res: Response) => {
+router.post('/', auth, isAdmin, async (req: Request, res: Response) => {
   try {
-    const { name, storeId, expirydate, stock, batchNumber } = req.body;
-
+    const { name, storeId, expirydate, stock } = req.body;
+    
     // Validate required fields
-    if (!name || !storeId || !expirydate || stock === undefined || !batchNumber) {
-      return res.status(400).json({
-        error: 'All fields (name, storeId, expirydate, stock, batchNumber) are required'
+    if (!name || !storeId || !expirydate || stock === undefined) {
+      return res.status(400).json({ 
+        error: 'All fields (name, storeId, expirydate, stock) are required' 
       });
     }
     
@@ -91,7 +98,6 @@ router.post('/', async (req: Request, res: Response) => {
       storeId,
       expirydate: expiry,
       stock,
-      batchNumber: batchNumber.trim(),
     });
     
     const populatedMedicine = await Medicine.findById(medicine._id).populate('storeId', 'name');
@@ -104,10 +110,10 @@ router.post('/', async (req: Request, res: Response) => {
 });
 
 // Update a medicine
-router.put('/:id', async (req: Request, res: Response) => {
+router.put('/:id', auth, isAdmin, async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { name, storeId, expirydate, stock, batchNumber } = req.body;
+    const { name, storeId, expirydate, stock } = req.body;
     
     // Validate stock is non-negative if provided
     if (stock !== undefined && stock < 0) {
@@ -140,7 +146,6 @@ router.put('/:id', async (req: Request, res: Response) => {
     if (storeId !== undefined) updateData.storeId = storeId;
     if (expirydate !== undefined) updateData.expirydate = expiry;
     if (stock !== undefined) updateData.stock = stock;
-    if (batchNumber !== undefined) updateData.batchNumber = batchNumber.trim();
     
     const medicine = await Medicine.findByIdAndUpdate(
       id,
@@ -160,7 +165,7 @@ router.put('/:id', async (req: Request, res: Response) => {
 });
 
 // Update medicine stock
-router.patch('/:id/stock', async (req: Request, res: Response) => {
+router.patch('/:id/stock', auth, isAdmin, async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const { stock } = req.body;
@@ -187,7 +192,7 @@ router.patch('/:id/stock', async (req: Request, res: Response) => {
 });
 
 // Delete a medicine
-router.delete('/:id', async (req: Request, res: Response) => {
+router.delete('/:id', auth, isAdmin, async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     

@@ -23,3 +23,10 @@ export interface IBilling {
   description?: string; // Added description field
   createdAt?: string;
 }
+
+export interface IUser {
+  _id: string;
+  email: string;
+  type: 'admin' | 'user';
+  storeId: IStore;
+}
