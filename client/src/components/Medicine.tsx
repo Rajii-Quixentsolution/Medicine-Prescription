@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Plus, Edit2, Trash2, Search, Pill, AlertTriangle } from 'lucide-react';
 import { IStore, IMedicine } from '../types'; // Import shared interfaces
+import { IUser } from '../types';
 
 interface MedicineFormData {
   name: string;
@@ -16,18 +17,21 @@ interface MedicineOperations {
   delete: (id: string) => Promise<void>;
 }
 
+
 interface MedicineProps {
   stores: IStore[];
   medicines: IMedicine[];
   setMedicines: React.Dispatch<React.SetStateAction<IMedicine[]>>;
   medicineOperations: MedicineOperations;
+  currentUser: IUser | null;
 }
 
 const Medicine: React.FC<MedicineProps> = ({ 
   stores, 
   medicines, 
   setMedicines, 
-  medicineOperations 
+  medicineOperations,
+  currentUser
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showModal, setShowModal] = useState(false);
@@ -126,14 +130,16 @@ const Medicine: React.FC<MedicineProps> = ({
           <Pill className="w-6 h-6 text-green-600" />
           <h1 className="text-2xl font-bold text-gray-800">Medicine Management</h1>
         </div>
-        <button
-          onClick={() => setShowModal(true)}
-          className="bg-green-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-green-700 transition-colors"
-          disabled={loading}
-        >
-          <Plus className="w-4 h-4" />
-          Add Medicine
-        </button>
+        {currentUser?.type === 'admin' && (
+          <button
+            onClick={() => setShowModal(true)}
+            className="bg-green-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-green-700 transition-colors"
+            disabled={loading}
+          >
+            <Plus className="w-4 h-4" />
+            Add Medicine
+          </button>
+        )}
       </div>
 
       {/* Search Bar */}
@@ -179,9 +185,11 @@ const Medicine: React.FC<MedicineProps> = ({
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[100px]">
                   Status
                 </th>
-                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[100px] sticky right-0 bg-gray-50">
-                  Actions
-                </th>
+                {currentUser?.type === 'admin' && (
+                  <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[100px] sticky right-0 bg-gray-50">
+                    Actions
+                  </th>
+                )}
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
@@ -226,26 +234,28 @@ const Medicine: React.FC<MedicineProps> = ({
                         <span className="text-green-600">Good</span>
                       )}
                     </td>
-                    <td className="px-4 py-4 whitespace-nowrap text-sm font-medium sticky right-0 bg-white">
-                      <div className="flex items-center justify-center gap-2">
-                        <button
-                          onClick={() => handleEdit(medicine)}
-                          className="text-green-600 hover:text-green-900 p-1 rounded hover:bg-green-50 transition-colors"
-                          disabled={loading}
-                          title="Edit"
-                        >
-                          <Edit2 className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(medicine._id)}
-                          className="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50 transition-colors"
-                          disabled={loading}
-                          title="Delete"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </td>
+                    {currentUser?.type === 'admin' && (
+                      <td className="px-4 py-4 whitespace-nowrap text-sm font-medium sticky right-0 bg-white">
+                        <div className="flex items-center justify-center gap-2">
+                          <button
+                            onClick={() => handleEdit(medicine)}
+                            className="text-green-600 hover:text-green-900 p-1 rounded hover:bg-green-50 transition-colors"
+                            disabled={loading}
+                            title="Edit"
+                          >
+                            <Edit2 className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(medicine._id)}
+                            className="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50 transition-colors"
+                            disabled={loading}
+                            title="Delete"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    )}
                   </tr>
                 ))
               ) : (

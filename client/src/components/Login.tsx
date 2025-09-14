@@ -24,44 +24,25 @@ const Login = () => {
     }
   };
 
-  // Define style types
-  type InputStyle = CSSProperties & {
-    '&:focus'?: CSSProperties;
-  };
-
   const containerStyle: CSSProperties = {
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    minHeight: 'calc(100vh - 100px)',
+    minHeight: '100vh',
     backgroundColor: '#f0f2f5',
     fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
-    padding: '20px',
+    padding: '15px',
     boxSizing: 'border-box' as const
   };
 
-  // Add keyframes for fadeInUp animation
-  const keyframesStyle = `
-    @keyframes fadeInUp {
-      from {
-        opacity: 0;
-        transform: translateY(20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-  `;
-
   const formStyle = {
     backgroundColor: '#ffffff',
-    padding: '40px 30px',
-    borderRadius: '8px',
+    padding: '20px',
+    borderRadius: '6px',
     textAlign: 'center' as const,
     width: '100%',
-    maxWidth: '400px',
-    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+    maxWidth: '320px',
+    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
     border: '1px solid #dddfe2'
   };
 
@@ -71,13 +52,13 @@ const Login = () => {
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#ffffff',
-    padding: '20px 0',
-    borderRadius: '8px',
-    marginBottom: '30px'
+    padding: '10px 0',
+    borderRadius: '6px',
+    marginBottom: '15px'
   };
 
   const logoStyle: CSSProperties = {
-    width: '250px',
+    width: '180px',
     height: 'auto',
     display: 'block',
     objectFit: 'contain'
@@ -85,35 +66,35 @@ const Login = () => {
 
   const titleStyle = {
     color: '#194F7F',
-    marginBottom: '35px',
-    fontWeight: 700,
-    fontSize: '24px',
+    marginBottom: '20px',
+    fontWeight: 600,
+    fontSize: '18px',
     textTransform: 'uppercase' as const,
-    letterSpacing: '0.5px'
+    letterSpacing: '0.3px'
   };
 
   const inputGroupStyle = {
-    marginBottom: '20px',
+    marginBottom: '15px',
     textAlign: 'left' as const
   };
 
   const labelStyle = {
     display: 'block',
-    marginBottom: '8px',
-    fontSize: '14px',
+    marginBottom: '6px',
+    fontSize: '13px',
     color: '#606770',
     fontWeight: 500
   };
 
   const inputStyle: CSSProperties = {
     width: '100%',
-    padding: '12px',
+    padding: '10px',
     border: '1px solid #dddfe2',
-    borderRadius: '6px',
+    borderRadius: '4px',
     backgroundColor: '#ffffff',
     color: '#1c1e21',
     boxSizing: 'border-box' as const,
-    fontSize: '16px'
+    fontSize: '14px'
   };
 
   const inputFocusStyle: CSSProperties = {
@@ -124,15 +105,15 @@ const Login = () => {
 
   const buttonStyle = {
     width: '100%',
-    padding: '12px',
+    padding: '10px',
     border: 'none',
-    borderRadius: '6px',
+    borderRadius: '4px',
     backgroundColor: '#194F7F',
     color: '#ffffff',
-    fontSize: '16px',
+    fontSize: '14px',
     fontWeight: 'bold' as const,
     cursor: 'pointer',
-    marginTop: '10px',
+    marginTop: '8px',
     transition: 'background-color 0.2s ease-in-out'
   };
 
@@ -143,24 +124,22 @@ const Login = () => {
 
   const errorStyle = {
     color: '#ff4d4d',
-    margin: '15px 0',
-    fontSize: '14px'
+    margin: '10px 0',
+    fontSize: '13px'
   };
 
   const footerStyle = {
-    marginTop: '32px',
+    marginTop: '20px',
     textAlign: 'center' as const,
-    fontSize: '14px',
+    fontSize: '12px',
     color: '#606770'
   };
 
   const [isHovered, setIsHovered] = useState(false);
 
   return (
-    <div>
-      <style>{keyframesStyle}</style>
-      <div style={containerStyle}>
-        <form onSubmit={handleLogin} style={formStyle}>
+    <div style={containerStyle}>
+      <form onSubmit={handleLogin} style={formStyle}>
         <div style={logoContainerStyle}>
           <img
             src="/quixent_updated_logo.png"
@@ -236,8 +215,7 @@ const Login = () => {
         <div style={footerStyle}>
           Secure access to your medical billing dashboard
         </div>
-        </form>
-      </div>
+      </form>
     </div>
   );
 };

@@ -102,6 +102,7 @@ export const medicineAPI = {
     storeId: string;
     expirydate: string;
     stock: number;
+    batchNumber: string;
   }) => {
     return api.post(`${API_BASE_URL}/medicines`, medicineData);
   },

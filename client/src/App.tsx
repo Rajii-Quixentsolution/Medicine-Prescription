@@ -1,5 +1,5 @@
 // client/src/App.tsx
-import React, { useState, useEffect, CSSProperties } from 'react';
+import React, { useState, useEffect } from 'react';
 import './App.css';
 import StoreComponent from './components/Store';
 import MedicineComponent from './components/Medicine';
@@ -8,115 +8,9 @@ import { storeAPI, medicineAPI, billingAPI, userAPI } from './services/api';
 import { IStore, IMedicine, IBilling, IUser } from './types'; // Import shared interfaces
 import Login from './components/Login';
 import UserComponent from './components/User';
+import Header from './components/Header';
 
 type ActiveTab = 'stores' | 'medicines' | 'prescriptions' | 'users';
-
-// Header styles
-const headerStyles = {
-  header: {
-    background: 'white',
-    borderBottom: '3px solid #194F7F',
-    padding: '1rem 2rem',
-    boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)',
-    position: 'sticky' as const,
-    top: 0,
-    zIndex: 50,
-    backdropFilter: 'blur(10px)',
-    WebkitBackdropFilter: 'blur(10px)',
-    transition: 'all 0.3s ease',
-  },
-  headerDark: {
-    background: '#1f2937',
-    borderBottom: '3px solid #3b82f6',
-    boxShadow: '0 2px 10px rgba(0, 0, 0, 0.3)',
-  },
-  container: {
-    maxWidth: '1200px',
-    margin: '0 auto',
-    padding: '1rem 2rem',
-  },
-  headerTop: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: '1.5rem',
-  },
-  headerBrand: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '1rem',
-  },
-  headerLogo: {
-    height: '60px',
-    width: 'auto',
-  },
-  headerTitle: {
-    fontSize: '1.75rem',
-    fontWeight: 700,
-    margin: 0,
-    color: '#194F7F',
-    letterSpacing: '-0.025em',
-    transition: 'color 0.3s ease',
-  },
-  headerTitleDark: {
-    color: '#60a5fa',
-  },
-  logoutBtn: {
-    background: '#194F7F',
-    color: 'white',
-    border: '2px solid #194F7F',
-    padding: '0.75rem 1.5rem',
-    borderRadius: '8px',
-    fontWeight: 600,
-    fontSize: '0.875rem',
-    cursor: 'pointer',
-    transition: 'all 0.3s ease',
-    backdropFilter: 'blur(10px)',
-    WebkitBackdropFilter: 'blur(10px)',
-  },
-  logoutBtnHover: {
-    background: '#0f3a5f',
-    borderColor: '#0f3a5f',
-    transform: 'translateY(-2px)',
-    boxShadow: '0 4px 12px rgba(25, 79, 127, 0.3)',
-  },
-  headerNav: {
-    display: 'flex',
-    gap: '1rem',
-    flexWrap: 'wrap' as const,
-  },
-  navBtn: {
-    background: '#f8fafc',
-    color: '#64748b',
-    border: '2px solid #e2e8f0',
-    padding: '0.875rem 1.5rem',
-    borderRadius: '8px',
-    fontWeight: 600,
-    fontSize: '0.875rem',
-    cursor: 'pointer',
-    transition: 'all 0.3s ease',
-    position: 'relative' as const,
-    overflow: 'hidden' as const,
-  },
-  navBtnHover: {
-    background: '#e2e8f0',
-    color: '#194F7F',
-    borderColor: '#cbd5e1',
-    transform: 'translateY(-2px)',
-    boxShadow: '0 4px 12px rgba(25, 79, 127, 0.15)',
-  },
-  navBtnActive: {
-    background: '#194F7F',
-    color: 'white',
-    borderColor: '#194F7F',
-    boxShadow: '0 4px 12px rgba(25, 79, 127, 0.3)',
-  },
-  navBtnActiveHover: {
-    background: '#0f3a5f',
-    borderColor: '#0f3a5f',
-    boxShadow: '0 6px 16px rgba(25, 79, 127, 0.4)',
-  },
-};
 
 function App() {
   // State hooks
@@ -124,27 +18,12 @@ function App() {
   const [activeTab, setActiveTab] = useState<ActiveTab>('stores');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [isDarkMode, setIsDarkMode] = useState(false);
-  const [isHovered, setIsHovered] = useState<{[key: string]: boolean}>({});
   
   // Shared state for all components
   const [stores, setStores] = useState<IStore[]>([]);
   const [medicines, setMedicines] = useState<IMedicine[]>([]);
   const [billings, setBillings] = useState<IBilling[]>([]);
   const [currentUser, setCurrentUser] = useState<IUser | null>(null);
-  
-  // Dark mode effect
-  useEffect(() => {
-    const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    setIsDarkMode(darkModeMediaQuery.matches);
-    
-    const handleChange = (e: MediaQueryListEvent) => {
-      setIsDarkMode(e.matches);
-    };
-    
-    darkModeMediaQuery.addEventListener('change', handleChange);
-    return () => darkModeMediaQuery.removeEventListener('change', handleChange);
-  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -353,6 +232,7 @@ function App() {
           stores={stores} 
           setStores={setStores}
           storeOperations={storeOperations}
+          currentUser={currentUser}
         />;
       case 'medicines':
         return <MedicineComponent 
@@ -360,6 +240,7 @@ function App() {
           medicines={medicines} 
           setMedicines={setMedicines}
           medicineOperations={medicineOperations}
+          currentUser={currentUser}
         />;
       case 'prescriptions':
         return <PrescriptionBilling 
@@ -376,111 +257,19 @@ function App() {
           stores={stores} 
           setStores={setStores}
           storeOperations={storeOperations}
+          currentUser={currentUser}
         />;
     }
   };
 
-  // Combine styles based on dark mode
-  const headerStyle = {
-    ...headerStyles.header,
-    ...(isDarkMode ? headerStyles.headerDark : {})
-  };
-
-  const titleStyle = {
-    ...headerStyles.headerTitle,
-    ...(isDarkMode ? headerStyles.headerTitleDark : {})
-  };
-
-  // Hover effect handlers
-  const handleMouseEnter = (btn: string) => {
-    setIsHovered(prev => ({ ...prev, [btn]: true }));
-  };
-
-  const handleMouseLeave = (btn: string) => {
-    setIsHovered(prev => ({ ...prev, [btn]: false }));
-  };
-
   return (
     <div className="App">
-      <header style={headerStyle}>
-        <div style={headerStyles.container}>
-          <div style={headerStyles.headerTop}>
-            <div style={headerStyles.headerBrand}>
-              <img 
-                src="/quixent_updated_logo.png" 
-                alt="Quixent Logo" 
-                style={headerStyles.headerLogo}
-              />
-              <h1 style={titleStyle}>MEDICAL BILLING MANAGEMENT</h1>
-            </div>
-            {token && (
-              <button 
-                style={{
-                  ...headerStyles.logoutBtn,
-                  ...(isHovered.logout ? headerStyles.logoutBtnHover : {})
-                }}
-                onMouseEnter={() => handleMouseEnter('logout')}
-                onMouseLeave={() => handleMouseLeave('logout')}
-                onClick={handleLogout}
-              >
-                LOGOUT
-              </button>
-            )}
-          </div>
-          <nav style={headerStyles.headerNav}>
-            <button
-              onClick={() => setActiveTab('stores')}
-              style={{
-                ...headerStyles.navBtn,
-                ...(activeTab === 'stores' ? headerStyles.navBtnActive : {}),
-                ...(isHovered.stores ? (activeTab === 'stores' ? headerStyles.navBtnActiveHover : headerStyles.navBtnHover) : {})
-              }}
-              onMouseEnter={() => handleMouseEnter('stores')}
-              onMouseLeave={() => handleMouseLeave('stores')}
-            >
-              STORE MANAGEMENT
-            </button>
-            <button
-              onClick={() => setActiveTab('medicines')}
-              style={{
-                ...headerStyles.navBtn,
-                ...(activeTab === 'medicines' ? headerStyles.navBtnActive : {}),
-                ...(isHovered.medicines ? (activeTab === 'medicines' ? headerStyles.navBtnActiveHover : headerStyles.navBtnHover) : {})
-              }}
-              onMouseEnter={() => handleMouseEnter('medicines')}
-              onMouseLeave={() => handleMouseLeave('medicines')}
-            >
-              MEDICINE INVENTORY
-            </button>
-            <button
-              onClick={() => setActiveTab('prescriptions')}
-              style={{
-                ...headerStyles.navBtn,
-                ...(activeTab === 'prescriptions' ? headerStyles.navBtnActive : {}),
-                ...(isHovered.prescriptions ? (activeTab === 'prescriptions' ? headerStyles.navBtnActiveHover : headerStyles.navBtnHover) : {})
-              }}
-              onMouseEnter={() => handleMouseEnter('prescriptions')}
-              onMouseLeave={() => handleMouseLeave('prescriptions')}
-            >
-              PRESCRIPTION BILLING
-            </button>
-            {currentUser?.type === 'admin' && (
-              <button
-                onClick={() => setActiveTab('users')}
-                style={{
-                  ...headerStyles.navBtn,
-                  ...(activeTab === 'users' ? headerStyles.navBtnActive : {}),
-                  ...(isHovered.users ? (activeTab === 'users' ? headerStyles.navBtnActiveHover : headerStyles.navBtnHover) : {})
-                }}
-                onMouseEnter={() => handleMouseEnter('users')}
-                onMouseLeave={() => handleMouseLeave('users')}
-              >
-                USER MANAGEMENT
-              </button>
-            )}
-          </nav>
-        </div>
-      </header>
+      <Header 
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        onLogout={handleLogout}
+        currentUser={currentUser}
+      />
       
       <main>
         {renderActiveComponent()}

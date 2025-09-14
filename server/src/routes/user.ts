@@ -1,11 +1,11 @@
 import express, { Request, Response } from 'express';
 import User from '../models/User';
-
+import { auth, isAdmin } from '../middleware/auth';
 
 const router = express.Router();
 
 // Get all users
-router.get('/', async (req: Request, res: Response) => {
+router.get('/', auth, isAdmin, async (req: Request, res: Response) => {
   try {
     const users = await User.find().select('-pwd');
     res.json(users);
@@ -16,7 +16,7 @@ router.get('/', async (req: Request, res: Response) => {
 });
 
 // Create a new user
-router.post('/', async (req: Request, res: Response) => {
+router.post('/', auth, isAdmin, async (req: Request, res: Response) => {
   try {
     const { email, pwd, type,storeId } = req.body;
 
@@ -41,7 +41,7 @@ router.post('/', async (req: Request, res: Response) => {
 });
 
 // Update a user
-router.put('/:id', async (req: Request, res: Response) => {
+router.put('/:id', auth, isAdmin, async (req: Request, res: Response) => {
   try {
     const { email, pwd, type, storeId } = req.body;
     const user = await User.findById(req.params.id);
@@ -66,7 +66,7 @@ router.put('/:id', async (req: Request, res: Response) => {
 });
 
 // Delete a user
-router.delete('/:id', async (req: Request, res: Response) => {
+router.delete('/:id', auth, isAdmin, async (req: Request, res: Response) => {
   try {
     const user = await User.findByIdAndDelete(req.params.id);
 

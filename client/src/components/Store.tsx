@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Plus, Edit2, Trash2, Search, Store as StoreIcon } from 'lucide-react';
+import { IUser } from '../types';
 
 interface IStore {
   _id: string;
@@ -21,9 +22,10 @@ interface StoreProps {
   stores: IStore[];
   setStores: React.Dispatch<React.SetStateAction<IStore[]>>;
   storeOperations: StoreOperations;
+  currentUser: IUser | null;
 }
 
-const Store: React.FC<StoreProps> = ({ stores, setStores, storeOperations }) => {
+const Store: React.FC<StoreProps> = ({ stores, setStores, storeOperations, currentUser }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [editingStore, setEditingStore] = useState<IStore | null>(null);
@@ -87,14 +89,16 @@ const Store: React.FC<StoreProps> = ({ stores, setStores, storeOperations }) => 
           <StoreIcon className="w-6 h-6 text-blue-600" />
           <h1 className="text-2xl font-bold text-gray-800">Store Management</h1>
         </div>
-        <button
-          onClick={() => setShowModal(true)}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-blue-700 transition-colors"
-          disabled={loading}
-        >
-          <Plus className="w-4 h-4" />
-          Add Store
-        </button>
+        {currentUser?.type === 'admin' && (
+          <button
+            onClick={() => setShowModal(true)}
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-blue-700 transition-colors"
+            disabled={loading}
+          >
+            <Plus className="w-4 h-4" />
+            Add Store
+          </button>
+        )}
       </div>
 
       {/* Search Bar */}
@@ -120,9 +124,11 @@ const Store: React.FC<StoreProps> = ({ stores, setStores, storeOperations }) => 
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Created Date
               </th>
-              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Actions
-              </th>
+              {currentUser?.type === 'admin' && (
+                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Actions
+                </th>
+              )}
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
@@ -135,22 +141,24 @@ const Store: React.FC<StoreProps> = ({ stores, setStores, storeOperations }) => 
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {store.createdAt}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <button
-                      onClick={() => handleEdit(store)}
-                      className="text-blue-600 hover:text-blue-900 mr-3"
-                      disabled={loading}
-                    >
-                      <Edit2 className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(store._id)}
-                      className="text-red-600 hover:text-red-900"
-                      disabled={loading}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </td>
+                  {currentUser?.type === 'admin' && (
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      <button
+                        onClick={() => handleEdit(store)}
+                        className="text-blue-600 hover:text-blue-900 mr-3"
+                        disabled={loading}
+                      >
+                        <Edit2 className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(store._id)}
+                        className="text-red-600 hover:text-red-900"
+                        disabled={loading}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </td>
+                  )}
                 </tr>
               ))
             ) : (
